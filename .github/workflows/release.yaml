@@ -1,10 +1,11 @@
 name: Build and Release
 env: 
-    release_file: main.exe
+    release_file: build/Debug/bin/main.exe
+    release_dir: build/Debug/bin/
 on:
   push:
     tags:
-      - 'v*.*.*'  # 仅当推送符合 vX.Y.Z 格式的标签时触发
+      - '*'   # 只匹配 tag
   workflow_dispatch:  # 也可手动触发
 
 jobs:
@@ -26,22 +27,23 @@ jobs:
       - name: Configure CMake
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-
+         
       # 4️⃣ 构建项目
       - name: Build with Ninja
-        run: cmake --build build --config Release --parallel
-
+        run: 
+          cmake --build build --config Release --parallel
+          windeployqt build\main.exe
       # 5️⃣ 上传构建产物到 Actions（调试查看）
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: "build/${{ env.release_file }}"
+          path: "${{ env.release_file }}"
 
       # 6️⃣ 上传构建产物到 GitHub Release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-            files: "build/${{ env.release_file }}"
+            files: "${{ env.release_file }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
