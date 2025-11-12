@@ -2,6 +2,7 @@ name: Build and Release
 env: 
     release_file: build/Release/bin/main.exe
     release_dir: build/Release/bin/
+    release_zip: main.zip
 on:
   push:
     tags:
@@ -60,7 +61,16 @@ jobs:
 
           # 部署 Qt 依赖
           windeployqt "${{ env.release_file }}"
-
+      # 5️⃣ 压缩打包（仅使用定义的路径）
+      - name: Compress Release Package
+        run: |
+          Write-Host "📦 压缩目录: ${{ env.release_dir }}"
+          if (Test-Path "${{ env.release_zip }}") {
+            Remove-Item "${{ env.release_zip }}" -Force
+          }
+          Compress-Archive -Path "${{ env.release_dir }}*" -DestinationPath "${{ env.release_zip }}" -Force
+          Write-Host "✅ 打包完成: ${{ env.release_zip }}"
+          
       # 5️⃣ 上传构建产物到 Actions（调试查看）
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -72,6 +82,6 @@ jobs:
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-            files: "${{ env.release_dir }}/**"
+            files: "${{ env.release_zip  }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
