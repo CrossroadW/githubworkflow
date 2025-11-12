@@ -2,6 +2,9 @@ name: Build and Release
 env: 
     release_file: main.exe
 on:
+  push:
+    tags:
+      - 'v*.*.*'  # 仅当推送符合 vX.Y.Z 格式的标签时触发
   workflow_dispatch:  # 也可手动触发
 
 jobs:
