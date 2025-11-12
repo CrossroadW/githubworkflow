@@ -23,27 +23,55 @@ jobs:
         with:
           arch: x64
 
+                # ---------- Windows Qt Installation ----------
+      - name: Install Qt (Windows)
+        if: runner.os == 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.12.12"
+          target: "desktop"
+          arch: "win64_msvc2017_64"
+          install-deps: true
       # 3️⃣ 配置 CMake（Ninja）
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          $testenv = "hello test env"
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
          
-      # 4️⃣ 构建项目
       - name: Build with Ninja
-        run: 
+        run: |
+          Write-Host "Test Env Variable: $testenv"
+
+          $qtPrefix = "$env:QT_ROOT_DIR"
+          Write-Host "Qt安装路径: $qtPrefix"
+
+          # 输出一级目录结构
+          Write-Host "---- Qt 一级目录结构 ----"
+          Get-ChildItem -Path $qtPrefix | ForEach-Object { Write-Host $_.FullName }
+
+          # 设置 PATH
+          $env:PATH = "$qtPrefix\bin;$env:PATH"
+
+          # 输出 PATH 验证
+          Write-Host "PATH=$env:PATH"
+
+          # 编译
           cmake --build build --config Release --parallel
+
+          # 部署 Qt 依赖
           windeployqt build\main.exe
+
       # 5️⃣ 上传构建产物到 Actions（调试查看）
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: "${{ env.release_file }}"
+          path: "${{ env.release_dir }}"
 
       # 6️⃣ 上传构建产物到 GitHub Release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-            files: "${{ env.release_file }}"
+            files: "${{ env.release_dir }}/**"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
