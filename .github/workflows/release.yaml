@@ -59,7 +59,7 @@ jobs:
           cmake --build build --config Release --parallel
 
           # 部署 Qt 依赖
-          windeployqt build\main.exe
+          windeployqt "${{ env.release_file }}"
 
       # 5️⃣ 上传构建产物到 Actions（调试查看）
       - name: Upload build artifacts
