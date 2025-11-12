@@ -1,0 +1,37 @@
+name: CMake Build with Ninja
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # 1️⃣ 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ 设置 MSVC 编译环境
+      - name: Setup MSVC Developer Command Prompt
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+
+
+      # 4️⃣ 配置 CMake（使用 Ninja 生成器）
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      # 5️⃣ 构建项目
+      - name: Build with Ninja
+        run: cmake --build build --config Release --parallel
+
+      # 6️⃣ 上传构建产物
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/main.exe
