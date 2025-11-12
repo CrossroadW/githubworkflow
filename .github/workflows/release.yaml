@@ -36,12 +36,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: build/main.exe
+          path: "build/${{ env.release_file }}"
 
       # 6️⃣ 上传构建产物到 GitHub Release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-            files: "build/${{ env.release_name }}"
+            files: "build/${{ env.release_file }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
