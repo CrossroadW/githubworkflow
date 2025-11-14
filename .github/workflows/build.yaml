@@ -50,29 +50,18 @@ jobs:
           platform_version: 2022
           toolset: msvc
 
+
   # =========================
-  # 3️⃣ 汇总输出（Qt + Boost）
+  # 3 构建项目
   # =========================
-  setup_merge:
+  build:
     runs-on: windows-latest
     needs:
       - install_qt
       - install_boost
     outputs:
       QT_ROOT_DIR: ${{ needs.install_qt.outputs.QT_ROOT_DIR }}
-      BOOST_ROOT: ${{ needs.install_boost.outputs.BOOST_ROOT }}
-    steps:
-      - run: echo "Merged Qt and Boost paths"
-
-  # =========================
-  # 4️⃣ 构建项目
-  # =========================
-  build:
-    runs-on: windows-latest
-    needs: setup_merge
-    env:
-      BOOST_ROOT: ${{ needs.setup_merge.outputs.BOOST_ROOT }}
-      QT_ROOT_DIR: ${{ needs.setup_merge.outputs.QT_ROOT_DIR }}
+      BOOST_ROOT: ${{ github.workspace }}/boost
     steps:
       - uses: actions/checkout@v4
 
