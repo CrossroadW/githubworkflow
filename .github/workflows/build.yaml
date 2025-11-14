@@ -5,11 +5,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
+  # =========================
+  # 1️⃣ 安装 Qt（并行 job）
+  # =========================
+  install_qt:
     runs-on: windows-latest
     outputs:
-      BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      QT_ROOT_DIR: ${{ steps.install-qt.outputs.QT_ROOT_DIR }}
+      QT_ROOT_DIR: ${{ steps.export.outputs.QT_ROOT_DIR }}
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +21,25 @@ jobs:
         with:
           version: "5.12.12"
           target: desktop
+          arch: "win64_msvc2017_64"
           install-deps: true
+
+      # 手动导出环境变量为 job 输出
+      - name: Export Qt root dir
+        id: export
+        shell: pwsh
+        run: |
+          echo "QT_ROOT_DIR=$env:QT_ROOT_DIR" >> $env:GITHUB_OUTPUT
+
+  # =========================
+  # 2️⃣ 安装 Boost（并行 job）
+  # =========================
+  install_boost:
+    runs-on: windows-latest
+    outputs:
+      BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Install Boost
         id: install-boost
@@ -30,23 +50,41 @@ jobs:
           platform_version: 2022
           toolset: msvc
 
+  # =========================
+  # 3️⃣ 汇总输出（Qt + Boost）
+  # =========================
+  setup_merge:
+    runs-on: windows-latest
+    needs:
+      - install_qt
+      - install_boost
+    outputs:
+      QT_ROOT_DIR: ${{ needs.install_qt.outputs.QT_ROOT_DIR }}
+      BOOST_ROOT: ${{ needs.install_boost.outputs.BOOST_ROOT }}
+    steps:
+      - run: echo "Merged Qt and Boost paths"
 
+  # =========================
+  # 4️⃣ 构建项目
+  # =========================
   build:
     runs-on: windows-latest
-    needs: setup
+    needs: setup_merge
     steps:
       - uses: actions/checkout@v4
 
       - name: Configure CMake
-        run: >
-          cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_PREFIX_PATH="${{ needs.setup.outputs.BOOST_ROOT }};${{ needs.setup.outputs.QT_ROOT_DIR }}"
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="${{ needs.setup_merge.outputs.BOOST_ROOT }};${{ needs.setup_merge.outputs.QT_ROOT_DIR }}"
 
       - name: Build
         run: cmake --build build --parallel
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: build/main.exe
