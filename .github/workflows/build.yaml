@@ -42,7 +42,7 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
-          
+
       - name: List BOOST_ROOT contents
         shell: pwsh
         run: |
@@ -57,7 +57,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};$env:QT_ROOT_DIR"
+            -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};${env:QT_ROOT_DIR}"
 
       # =========================
       # 4️⃣ 构建
