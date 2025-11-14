@@ -35,7 +35,6 @@ jobs:
           platform_version: 2022
           toolset: msvc
 
-
       # =========================
       # 3️⃣ 配置 CMake
       # =========================
@@ -43,6 +42,15 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
+          
+      - name: List BOOST_ROOT contents
+        shell: pwsh
+        run: |
+          Write-Host "===== BOOST_ROOT Directory Contents ====="
+          # 列出 BOOST_ROOT 下的所有文件和目录（递归一层）
+          Get-ChildItem -Path "$env:BOOST_ROOT" | ForEach-Object {
+              Write-Host $_.FullName
+          }
 
       - name: Configure CMake
         shell: pwsh
