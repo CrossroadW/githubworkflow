@@ -19,7 +19,14 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
- 
+
+      - name: Install Qt (Windows)
+        if: runner.os == 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.12.12"
+          target: "desktop"
+          install-deps: true
       - name: Install boost
         uses: MarkusJx/install-boost@v2
         id: install-boost
@@ -41,7 +48,7 @@ jobs:
         env:
             BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
-          cmake -DCMAKE_PREFIX_PATH=$env:BOOST_ROOT   -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};${env:QT_ROOT_DIR}"   -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       # 5️⃣ 构建项目
       - name: Build with Ninja
