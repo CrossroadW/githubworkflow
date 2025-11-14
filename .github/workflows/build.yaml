@@ -70,6 +70,9 @@ jobs:
   build:
     runs-on: windows-latest
     needs: setup_merge
+    env:
+      BOOST_ROOT: ${{ needs.setup_merge.outputs.BOOST_ROOT }}
+      QT_ROOT_DIR: ${{ needs.setup_merge.outputs.QT_ROOT_DIR }}
     steps:
       - uses: actions/checkout@v4
 
@@ -107,7 +110,7 @@ jobs:
           }
           cmake -S . -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_PREFIX_PATH="${{ needs.setup_merge.outputs.BOOST_ROOT }};${{ needs.setup_merge.outputs.QT_ROOT_DIR }}"
+            -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};${env.QT_ROOT_DIR}"
 
       - name: Build
         run: cmake --build build --parallel
