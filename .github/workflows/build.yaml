@@ -73,17 +73,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      
       - name: Setup MSVC Developer Command Prompt
         if: runner.os == 'Windows'
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
 
-
       - name: Configure CMake
         shell: pwsh
         run: |
+          # 输出 Boost 目录结构
+          Write-Host "===== Boost Directory ====="
+          Get-ChildItem -Path "${env:BOOST_ROOT}" -Directory | Select-Object -First 5 | ForEach-Object {
+              Write-Host $_.FullName
+              Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
+                  Write-Host "  └─ $_"
+                  Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
+                      Write-Host "      └─ $_"
+                  }
+              }
+          }
+
+          # 输出 Qt 目录结构
+          Write-Host "===== Qt Directory ====="
+          Get-ChildItem -Path "${env:QT_ROOT_DIR}" -Directory | Select-Object -First 5 | ForEach-Object {
+              Write-Host $_.FullName
+              Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
+                  Write-Host "  └─ $_"
+                  Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
+                      Write-Host "      └─ $_"
+                  }
+              }
+          }
           cmake -S . -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_PREFIX_PATH="${{ needs.setup_merge.outputs.BOOST_ROOT }};${{ needs.setup_merge.outputs.QT_ROOT_DIR }}"
