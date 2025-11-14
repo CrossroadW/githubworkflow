@@ -3,8 +3,8 @@ name: CMake Build with Ninja
 on:
   # push:
   # pull_request:
-    workflow_dispatch:  # 允许手动触发
-    
+  workflow_dispatch: # 允许手动触发
+
 jobs:
   build:
     runs-on: windows-latest
@@ -19,12 +19,18 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
-
+      - name: vcpkg build
+        uses: johnwason/vcpkg-action@v7
+        id: vcpkg
+        with:
+          pkgs: boost
+          triplet: x64-windows-release
+          token: ${{ github.token }}
 
       # 4️⃣ 配置 CMake（使用 Ninja 生成器）
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake  -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake  -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       # 5️⃣ 构建项目
       - name: Build with Ninja

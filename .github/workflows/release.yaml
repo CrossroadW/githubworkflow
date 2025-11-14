@@ -1,13 +1,13 @@
 name: Build and Release
-env: 
-    release_file: build/Release/bin/main.exe
-    release_dir: build/Release/bin/
-    release_zip: main.zip
+env:
+  release_file: build/Release/bin/main.exe
+  release_dir: build/Release/bin/
+  release_zip: main.zip
 on:
   push:
     tags:
-      - '*'   # 只匹配 tag
-  workflow_dispatch:  # 也可手动触发
+      - "*" # 只匹配 tag
+  workflow_dispatch: # 也可手动触发
 
 jobs:
   build:
@@ -22,9 +22,10 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
-          arch: x64
+          arch:
+            x64
 
-                # ---------- Windows Qt Installation ----------
+            # ---------- Windows Qt Installation ----------
       - name: Install Qt (Windows)
         if: runner.os == 'Windows'
         uses: jurplel/install-qt-action@v4
@@ -38,8 +39,14 @@ jobs:
         run: |
           $testenv = "hello test env"
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
-         
-      - name: Build with Ninja
+
+      - name: Linux Build with Ninja
+        if: runner.os == 'Linux'
+        run: |
+          cmake --build build --config Release --parallel
+
+      - name: Windows build with Ninja and deploy Qt
+        if: runner.os == 'Windows'
         run: |
           Write-Host "Test Env Variable: $testenv"
 
@@ -61,27 +68,28 @@ jobs:
 
           # 部署 Qt 依赖
           windeployqt "${{ env.release_file }}"
-      # 5️⃣ 压缩打包（仅使用定义的路径）
-      - name: Compress Release Package
-        run: |
-          Write-Host "📦 压缩目录: ${{ env.release_dir }}"
+
+           Write-Host "📦 压缩目录: ${{ env.release_dir }}"
           if (Test-Path "${{ env.release_zip }}") {
             Remove-Item "${{ env.release_zip }}" -Force
           }
           Compress-Archive -Path "${{ env.release_dir }}*" -DestinationPath "${{ env.release_zip }}" -Force
           Write-Host "✅ 打包完成: ${{ env.release_zip }}"
-          
+
+
       # 5️⃣ 上传构建产物到 Actions（调试查看）
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
         with:
           name: build-artifacts
-          path: "${{ env.release_dir }}"
+          path: "${{ env.release_zip }}"
 
       # 6️⃣ 上传构建产物到 GitHub Release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag' &&  runner.os == 'Windows'
         with:
-            files: "${{ env.release_zip  }}"
+          files: "${{ env.release_zip  }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
