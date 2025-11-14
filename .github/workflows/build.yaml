@@ -73,6 +73,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      
+      - name: Setup MSVC Developer Command Prompt
+        if: runner.os == 'Windows'
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+
+
       - name: Configure CMake
         shell: pwsh
         run: |
