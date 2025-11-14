@@ -31,7 +31,7 @@ jobs:
         uses: MarkusJx/install-boost@v2
         with:
           boost_version: 1.89.0
-          boost_install_dir: ${{ env.BOOST_ROOT }}
+          boost_install_dir: ${{ github.workspace }}
           platform_version: 2022
           toolset: msvc
 
@@ -46,9 +46,12 @@ jobs:
       - name: List BOOST_ROOT contents
         shell: pwsh
         run: |
-          Write-Host "===== BOOST_ROOT Directory Contents ====="
-          # 列出 BOOST_ROOT 下的所有文件和目录（递归一层）
-          Get-ChildItem -Path "$env:BOOST_ROOT" | ForEach-Object {
+          Write-Host "===== GitHub Workspace Top-Level (L=1) ====="
+          # 只列出第一层目录和文件
+          Get-ChildItem -Path "$env:GITHUB_WORKSPACE" | ForEach-Object {
+              Write-Host $_.FullName
+          }
+          Get-ChildItem -Path "${env:GITHUB_WORKSPACE}/boost" | ForEach-Object {
               Write-Host $_.FullName
           }
 
