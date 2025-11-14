@@ -1,20 +1,19 @@
 name: CMake Build with Ninja
-
+env:
+  BOOST_ROOT: ${{ github.workspace }}/boost
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  # =========================
-  # 1️⃣ 安装 Qt（并行 job）
-  # =========================
-  install_qt:
+  build_all:
     runs-on: windows-latest
-    outputs:
-      QT_ROOT_DIR: ${{ steps.export.outputs.QT_ROOT_DIR }}
     steps:
       - uses: actions/checkout@v4
 
+      # =========================
+      # 1️⃣ 安装 Qt
+      # =========================
       - name: Install Qt
         id: install-qt
         uses: jurplel/install-qt-action@v4
@@ -24,49 +23,23 @@ jobs:
           arch: "win64_msvc2017_64"
           install-deps: true
 
-      # 手动导出环境变量为 job 输出
-      - name: Export Qt root dir
-        id: export
-        shell: pwsh
-        run: |
-          echo "QT_ROOT_DIR=$env:QT_ROOT_DIR" >> $env:GITHUB_OUTPUT
-
-  # =========================
-  # 2️⃣ 安装 Boost（并行 job）
-  # =========================
-  install_boost:
-    runs-on: windows-latest
-    outputs:
-      BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-    steps:
-      - uses: actions/checkout@v4
-
+      # =========================
+      # 2️⃣ 安装 Boost
+      # =========================
       - name: Install Boost
         id: install-boost
         uses: MarkusJx/install-boost@v2
         with:
           boost_version: 1.89.0
-          boost_install_dir: ${{ github.workspace }}/boost
+          boost_install_dir: ${{ env.BOOST_ROOT }}
           platform_version: 2022
           toolset: msvc
 
 
-  # =========================
-  # 3 构建项目
-  # =========================
-  build:
-    runs-on: windows-latest
-    needs:
-      - install_qt
-      - install_boost
-    outputs:
-      QT_ROOT_DIR: ${{ needs.install_qt.outputs.QT_ROOT_DIR }}
-      BOOST_ROOT: ${{ github.workspace }}/boost
-    steps:
-      - uses: actions/checkout@v4
-
+      # =========================
+      # 3️⃣ 配置 CMake
+      # =========================
       - name: Setup MSVC Developer Command Prompt
-        if: runner.os == 'Windows'
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
@@ -74,36 +47,19 @@ jobs:
       - name: Configure CMake
         shell: pwsh
         run: |
-          # 输出 Boost 目录结构
-          Write-Host "===== Boost Directory ====="
-          Get-ChildItem -Path "${env:BOOST_ROOT}" -Directory | Select-Object -First 5 | ForEach-Object {
-              Write-Host $_.FullName
-              Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
-                  Write-Host "  └─ $_"
-                  Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
-                      Write-Host "      └─ $_"
-                  }
-              }
-          }
-
-          # 输出 Qt 目录结构
-          Write-Host "===== Qt Directory ====="
-          Get-ChildItem -Path "${env:QT_ROOT_DIR}" -Directory | Select-Object -First 5 | ForEach-Object {
-              Write-Host $_.FullName
-              Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
-                  Write-Host "  └─ $_"
-                  Get-ChildItem -Path $_.FullName -Directory | Select-Object -First 5 | ForEach-Object {
-                      Write-Host "      └─ $_"
-                  }
-              }
-          }
           cmake -S . -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};${env.QT_ROOT_DIR}"
+            -DCMAKE_PREFIX_PATH="${env:BOOST_ROOT};$env:QT_ROOT_DIR"
 
+      # =========================
+      # 4️⃣ 构建
+      # =========================
       - name: Build
         run: cmake --build build --parallel
 
+      # =========================
+      # 5️⃣ 上传 artifacts
+      # =========================
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
