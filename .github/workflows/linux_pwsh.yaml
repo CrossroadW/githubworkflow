@@ -12,7 +12,7 @@ jobs:
       - name: Configure CMake
         shell: pwsh
         run: |
-          .\version_info.ps1
+          powershell .\version_info.ps1
           cmake -S . -B build -G Ninja `
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build --parallel
