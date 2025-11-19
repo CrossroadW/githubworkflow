@@ -4,9 +4,9 @@ env:
   release_dir: build/Release/bin/
   release_zip: main.zip
 on:
-  push:
-    tags:
-      - "*" # 只匹配 tag
+  # push:
+  #   tags:
+  #     - "*" # 只匹配 tag
   workflow_dispatch: # 也可手动触发
 
 jobs:

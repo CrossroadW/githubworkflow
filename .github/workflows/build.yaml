@@ -2,7 +2,7 @@ name: CMake Build with Ninja
 env:
   BOOST_ROOT: ${{ github.workspace }}/boost
 on:
-  push:
+  # push:
   workflow_dispatch:
 
 jobs:
