@@ -30,7 +30,7 @@ namespace version{
 "@ | Out-File -Encoding utf8 version.cpp
 
 # 提示生成成功
-Write-Output "version.cpp file generated"
+Write-Output "version.cpp file 生成乐"
 Get-Content version.cpp
 
 # Linux 中：pwsh version.ps1 需要第一行。
