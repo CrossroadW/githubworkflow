@@ -3,5 +3,5 @@ Type=Application
 Name=GithubWorkFlow
 Exec=main
 Terminal=false
-Icon=github
+Icon=github-256x256
 Categories=Utility
