@@ -1,0 +1,45 @@
+name: test_linux_deploy
+on:
+  # push:
+  workflow_dispatch:
+
+jobs:
+  build_all:
+    runs-on: ubuntu-latest
+    steps:
+      # 检出仓库
+      - uses: actions/checkout@v4
+
+      # 部署工具
+      - name: Install LinuxDeploy
+        id: install-linuxdeploy
+        uses: miurahr/install-linuxdeploy-action@v1.8.0
+        with:
+          plugins: qt appimage
+
+      # 构建
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Create application dir
+        run: |
+          mkdir -p appdir/usr/bin
+          cp build/Release/bin/main appdir/usr/bin/
+          cp GithubWorkFlow.desktop appdir/
+          cp GitHub.png appdir/
+          ${{ steps.install-linuxdeploy.outputs.linuxdeploy }} \
+            --plugin=qt \
+            --output=GithubWorkFlow \
+            --executable=appdir/usr/bin/main \
+            --appdir appdir \
+            --desktop-file GithubWorkFlow.desktop \
+            --icon-file appdir/GitHub.png
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v5
+        with:
+          name: GithubWorkFlow
+          path: GithubWorkFlow   
