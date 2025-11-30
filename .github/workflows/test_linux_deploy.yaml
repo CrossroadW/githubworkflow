@@ -19,7 +19,7 @@ jobs:
 
       - name: install-deps 
         run: |
-          sudo apt update && qt5-base
+          sudo apt update && sudo apt install -y qt5-base
 
       # 构建
       - name: Configure CMake
