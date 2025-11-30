@@ -16,15 +16,10 @@ jobs:
         uses: miurahr/install-linuxdeploy-action@v1.8.0
         with:
           plugins: qt appimage
-          
-      - name: Install Qt (Windows)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: "5.12.12"
-          target: "desktop"
-          arch: "win64_msvc2017_64"
-          install-deps: true
-          dir: ${{ github.workspace }}/Qt
+
+      - name: install-deps 
+        run: |
+          sudo apt update && qt5-base
 
       # 构建
       - name: Configure CMake
