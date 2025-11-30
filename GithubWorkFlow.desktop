@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=GithubWorkFlow
-Exec=GithubWorkFlow
-Terminal=true
-Icon=icons
+Exec=main
+Terminal=false
+Icon=github
 Categories=Utility

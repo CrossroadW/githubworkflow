@@ -28,14 +28,12 @@ jobs:
         run: |
           mkdir -p appdir/usr/bin
           cp build/Release/bin/main appdir/usr/bin/
-          cp GithubWorkFlow.desktop appdir/
-          cp github-256x256.png appdir/
           ${{ steps.install-linuxdeploy.outputs.linuxdeploy }} \
             --output=GithubWorkFlow \
             --executable=appdir/usr/bin/main \
             --appdir appdir \
             --desktop-file GithubWorkFlow.desktop \
-            --icon-file appdir/github-256x256.png
+            --icon-file github-256x256.png
 
       - name: Upload AppImage
         uses: actions/upload-artifact@v5
