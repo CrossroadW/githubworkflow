@@ -16,6 +16,15 @@ jobs:
         uses: miurahr/install-linuxdeploy-action@v1.8.0
         with:
           plugins: qt appimage
+          
+      - name: Install Qt (Windows)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.12.12"
+          target: "desktop"
+          arch: "win64_msvc2017_64"
+          install-deps: true
+          dir: ${{ github.workspace }}/Qt
 
       # 构建
       - name: Configure CMake
@@ -30,6 +39,7 @@ jobs:
           cp build/Release/bin/main appdir/usr/bin/
           ${{ steps.install-linuxdeploy.outputs.linuxdeploy }} \
             --output appimage \
+            --plugin qt
             --executable appdir/usr/bin/main \
             --appdir appdir \
             --desktop-file GithubWorkFlow.desktop \

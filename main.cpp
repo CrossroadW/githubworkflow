@@ -1,12 +1,16 @@
-// #include <QApplication>
-// #include <QWidget>
-// #include <boost/asio.hpp>
+#include <QCoreApplication>
+#include <QTimer>
+#include <QTextStream>
 
-int main(int argc, char *argv[]) {
-  // QApplication app(argc, argv);
-  // QWidget w;
-  // w.show();
+int main(int argc, char *argv[])
+{
+    QCoreApplication app(argc, argv);
 
-  // using namespace boost::asio;
-  // return app.exec();
+    QTextStream out(stdout);
+    out << "Hello from Qt console program!" << Qt::endl;
+
+    // 可选：延迟退出，方便测试 linuxdeploy
+    QTimer::singleShot(1000, &app, &QCoreApplication::quit);
+
+    return app.exec();
 }
