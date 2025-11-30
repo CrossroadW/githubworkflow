@@ -31,7 +31,6 @@ jobs:
           cp GithubWorkFlow.desktop appdir/
           cp GitHub.png appdir/
           ${{ steps.install-linuxdeploy.outputs.linuxdeploy }} \
-            --plugin=qt \
             --output=GithubWorkFlow \
             --executable=appdir/usr/bin/main \
             --appdir appdir \
