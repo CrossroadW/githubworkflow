@@ -34,7 +34,7 @@ jobs:
           cp build/Release/bin/main appdir/usr/bin/
           ${{ steps.install-linuxdeploy.outputs.linuxdeploy }} \
             --output appimage \
-            --plugin qt
+            --plugin qt \
             --executable appdir/usr/bin/main \
             --appdir appdir \
             --desktop-file GithubWorkFlow.desktop \
